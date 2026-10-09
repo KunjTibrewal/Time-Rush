@@ -18,3 +18,4 @@ def check_input_timeout(time_limit):
         print(f"\nThank you! You entered: {result['text']}")
         return True
 success = check_input_timeout(5)
+print('done')
