@@ -1,4 +1,15 @@
 import threading
+
+def fifty_fifty():
+    pass
+def switch_question():
+    pass
+def ask_the_audience():
+    pass
+def extra_time():
+    pass
+
+
 def check_input_timeout(time_limit):
     result = {"text": None}
     def target_func():
@@ -18,3 +29,20 @@ def check_input_timeout(time_limit):
         print(f"\nThank you! You entered: {result['text']}")
         return True
 success = check_input_timeout(5)
+
+
+#LIFELINES
+
+
+lifeline = {1: ["50-50", True, fifty_fifty],                            #[0]=LIFELINE 
+            2: ["Switch the question", True, switch_question],          #[1]=AVAILABLITY
+            3: ["Ask the audience", True, ask_the_audience],            #[2]=FUNCTION
+            4: ["Extra time", True, extra_time]}
+
+def lifelines(a):
+    if lifeline[int(a)][1]:
+        lifeline[int(a)][1] = False
+        lifeline[int(a)][2]()
+    else:
+        print("You have already used the",lifeline[int(a)][0],".")
+
