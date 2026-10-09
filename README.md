@@ -1,0 +1,2 @@
+# Time Rush
+TIME RUSH is a first-year B.Tech IT project developed in Python as a terminal-based interactive quiz game. It challenges players to answer questions under time pressure while testing their knowledge, accuracy, and decision-making skills. The project demonstrates fundamental Python programming concepts, including conditional statements, loops, functions, and game logic. Developed as part of our first-year coursework at VIT Vellore.
