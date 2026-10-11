@@ -16,6 +16,7 @@ def extra_time():
 #LIFELINES
 
 
+
 lifeline = {1: ["50-50", True, fifty_fifty],                            #[0]=LIFELINE 
             2: ["Switch the question", True, switch_question],          #[1]=AVAILABLITY
             3: ["Ask the audience", True, ask_the_audience],            #[2]=FUNCTION
