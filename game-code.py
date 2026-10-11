@@ -5,8 +5,7 @@ import random
 import ctypes
 
 
-def ask_the_audience():
-    pass
+
 def extra_time():
     pass
 
@@ -22,7 +21,7 @@ def fifty_fifty(q_data):
     for i in eliminated:
         q_data[i] = None
 
-def switch_question(q_data, current_idx, questions, used_questions, Easy_que, Medium_que, Hard_que):
+def switch_question(q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que):
     if current_idx < 5:
         question_pool = Easy_que
         used_set = used_questions["easy"]
@@ -50,22 +49,60 @@ def switch_question(q_data, current_idx, questions, used_questions, Easy_que, Me
     input("Press ENTER to continue...")
 
 
+
+def ask_the_audience(q_data, current_idx):
+    if current_idx < 5:
+        accuracy = 0.95                                                                      #EASY QUESTION AUDIENCE ACCURACY 0.95
+    elif current_idx < 10:
+        accuracy = 0.85                                                                      #MEDIUM QUESTION AUDIENCE ACCURACY 0.85
+    else:
+        accuracy = 0.65                                                                      #HARD QUESTION AUDIENCE ACCURACY 0.65
+    active_options = [i for i in range(1, 5) if q_data[i] is not None]                       #FOR 50-50 LIFELINE, ELIMINATE OPTIONS
+    correct_opt = q_data[5]
+    if random.random() < accuracy:
+        winner = correct_opt
+    else:
+        wrong_options = [i for i in active_options if i != correct_opt]
+        winner = random.choice(wrong_options)
+
+    while True:
+        cuts = sorted(random.sample(range(1, 100), len(active_options) - 1))
+        boundaries = [0] + cuts + [100]
+        percentages = [boundaries[i + 1] - boundaries[i] for i in range(len(active_options))]
+        votes = dict(zip(active_options, percentages))
+        if votes[winner] > max(votes[i] for i in active_options if i != winner):
+            break
+
+    print(f"\n{C_GOLD}{C_BOLD}       AUDIENCE POLL{C_RESET}")
+    print("-" * 40)
+    for option in active_options:
+        label = "ABCD"[option - 1]
+        percentage = votes[option]
+        bar = "#" * (percentage // 2)
+        print(f"{label} | {bar:<50} {percentage}%")
+    print("-" * 40)
+    input("Press ENTER to continue...")
+
+
+
+
 lifeline = {1: ["50-50", True, fifty_fifty],                            #[0]=LIFELINE 
             2: ["Switch the question", True, switch_question],          #[1]=AVAILABLITY
             3: ["Ask the audience", True, ask_the_audience],            #[2]=FUNCTION
             4: ["Extra time", True, extra_time]}
 
-def lifelines(a, q_data, current_idx, questions, used_questions, Easy_que, Medium_que, Hard_que):
+def lifelines(a, q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que):
     if lifeline[int(a)][1]:
         lifeline[int(a)][1] = False
         if int(a) == 2:
-            switch_question(q_data, current_idx, questions, used_questions, Easy_que, Medium_que, Hard_que)
+            switch_question(q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que)
+        elif int(a) == 3:
+            ask_the_audience(q_data, current_idx)
         else:
             lifeline[int(a)][2](q_data)
     else:
         print(f"\n{C_RED}You have already used the {lifeline[int(a)][0]}.{C_RESET}")
-        print(f"{C_CYAN}Press ENTER to continue...{C_RESET}")
-        input()
+        input(f"{C_CYAN}Press ENTER to continue...{C_RESET}")
 
 
 # Safe initialization for ANSI colors on Windows CMD
@@ -308,7 +345,7 @@ def play_game():
             }
 
             if user_input in lifelines_map:
-                lifelines(user_input, q_data, current_idx, questions, used_questions, Easy_que, Medium_que, Hard_que)
+                lifelines(user_input, q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que)
                 continue
 
             # Handle Answers (Input A, B, C, D)
