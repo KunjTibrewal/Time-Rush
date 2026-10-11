@@ -4,8 +4,7 @@ import sys
 import random
 import ctypes
 
-def switch_question():
-    pass
+
 def ask_the_audience():
     pass
 def extra_time():
@@ -17,12 +16,38 @@ def fifty_fifty(q_data):
     correct_opt = q_data[5]  # Correct option number (1-4)
     wrong_options = [
         i for i in range(1, 5)
-        if i != correct_opt and q_data[i] is not None
-    ]
+        if i != correct_opt and q_data[i] is not None]
     eliminated = random.sample(wrong_options, 2)
 
     for i in eliminated:
         q_data[i] = None
+
+def switch_question(q_data, current_idx, questions, used_questions, Easy_que, Medium_que, Hard_que):
+    if current_idx < 5:
+        question_pool = Easy_que
+        used_set = used_questions["easy"]
+    elif current_idx < 10:
+        question_pool = Medium_que
+        used_set = used_questions["medium"]
+    else:
+        question_pool = Hard_que
+        used_set = used_questions["hard"]
+
+    available = [
+        i for i in range(len(question_pool))
+        if i not in used_set
+    ]
+
+    if not available:
+        print(f"\n{C_RED}No unused questions available!{C_RESET}")
+        input("Press ENTER to continue...")
+        return
+
+    new_idx = random.choice(available)
+    used_set.add(new_idx)
+    q_data[:] = question_pool[new_idx]
+    print(f"\n{C_GREEN}Question switched successfully!{C_RESET}")
+    input("Press ENTER to continue...")
 
 
 lifeline = {1: ["50-50", True, fifty_fifty],                            #[0]=LIFELINE 
@@ -30,15 +55,17 @@ lifeline = {1: ["50-50", True, fifty_fifty],                            #[0]=LIF
             3: ["Ask the audience", True, ask_the_audience],            #[2]=FUNCTION
             4: ["Extra time", True, extra_time]}
 
-def lifelines(a, q_data):
+def lifelines(a, q_data, current_idx, questions, used_questions, Easy_que, Medium_que, Hard_que):
     if lifeline[int(a)][1]:
         lifeline[int(a)][1] = False
-        lifeline[int(a)][2](q_data)
+        if int(a) == 2:
+            switch_question(q_data, current_idx, questions, used_questions, Easy_que, Medium_que, Hard_que)
+        else:
+            lifeline[int(a)][2](q_data)
     else:
         print(f"\n{C_RED}You have already used the {lifeline[int(a)][0]}.{C_RESET}")
         print(f"{C_CYAN}Press ENTER to continue...{C_RESET}")
         input()
-
 
 
 # Safe initialization for ANSI colors on Windows CMD
@@ -237,6 +264,11 @@ def play_game():
                 [Medium_que[Num] for Num in Q_No_medium] + \
                 [Hard_que[Num] for Num in Q_No_hard]
 
+    used_questions = {
+        "easy": set(Q_No_easy),
+        "medium": set(Q_No_medium),
+        "hard": set(Q_No_hard)}
+
     current_idx = 0
     total_questions = len(questions)
 
@@ -256,6 +288,7 @@ def play_game():
             time_limit = None
 
         while True:
+            correct_opt = q_data[5]
             render_ui(q_data, current_idx, time_limit, total_questions)
 
             if time_limit is None:
@@ -275,7 +308,7 @@ def play_game():
             }
 
             if user_input in lifelines_map:
-                lifelines(user_input, q_data)
+                lifelines(user_input, q_data, current_idx, questions, used_questions, Easy_que, Medium_que, Hard_que)
                 continue
 
             # Handle Answers (Input A, B, C, D)
