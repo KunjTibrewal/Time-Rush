@@ -4,8 +4,6 @@ import sys
 import random
 import ctypes
 
-def fifty_fifty():
-    pass
 def switch_question():
     pass
 def ask_the_audience():
@@ -15,6 +13,16 @@ def extra_time():
 
 #LIFELINES
 
+def fifty_fifty(q_data):
+    correct_opt = q_data[5]  # Correct option number (1-4)
+    wrong_options = [
+        i for i in range(1, 5)
+        if i != correct_opt and q_data[i] is not None
+    ]
+    eliminated = random.sample(wrong_options, 2)
+
+    for i in eliminated:
+        q_data[i] = None
 
 
 lifeline = {1: ["50-50", True, fifty_fifty],                            #[0]=LIFELINE 
@@ -22,13 +30,14 @@ lifeline = {1: ["50-50", True, fifty_fifty],                            #[0]=LIF
             3: ["Ask the audience", True, ask_the_audience],            #[2]=FUNCTION
             4: ["Extra time", True, extra_time]}
 
-def lifelines(a):
+def lifelines(a, q_data):
     if lifeline[int(a)][1]:
         lifeline[int(a)][1] = False
-        lifeline[int(a)][2]()
+        lifeline[int(a)][2](q_data)
     else:
-        print("You have already used the",lifeline[int(a)][0],".")
-
+        print(f"\n{C_RED}You have already used the {lifeline[int(a)][0]}.{C_RESET}")
+        print(f"{C_CYAN}Press ENTER to continue...{C_RESET}")
+        input()
 
 
 
@@ -132,7 +141,7 @@ def render_ui(q_data, current_q_idx, time_limit, total_questions):
 
     # Header
     print(f"{C_GOLD}{C_BOLD}" + "=" * 78 + f"{C_RESET}")
-    print(f"{C_GOLD}{C_BOLD}   T I M E   R U S H   --   K B C   T E R M I N A L   E D I T I O N{C_RESET}".center(88))
+    print(f"{C_GOLD}{C_BOLD}   T I M E   R U S H  {C_RESET}".center(88))
     print(f"{C_GOLD}{C_BOLD}" + "=" * 78 + f"{C_RESET}\n")
 
     # HUD Stats & Timer Info
@@ -153,7 +162,13 @@ def render_ui(q_data, current_q_idx, time_limit, total_questions):
 
     for i in range(4):
         text = options[i]
-        formatted_opts.append(f"{C_CYAN}[{opt_labels[i]}]:{C_RESET} {C_BOLD}{text:<22}{C_RESET}")
+        if text is None:
+            formatted_opts.append(" " * 30)
+        else:
+            formatted_opts.append(
+                f"{C_CYAN}[{opt_labels[i]}]:{C_RESET} "
+                f"{C_BOLD}{text:<22}{C_RESET}"
+            )
 
     print(f"    {formatted_opts[0].ljust(48)} {formatted_opts[1]}")
     print()
@@ -206,6 +221,8 @@ def get_input_with_timeout(timeout):
 # GAME FLOW
 # ---------------------------------------------------------
 def play_game():
+    for item in lifeline.values():
+        item[1] = True
     # Extract unique random questions using your custom selection functions[cite: 1]
     Q_No_easy = select_que_no()
     Q_No_medium = select_que_no()
@@ -258,15 +275,20 @@ def play_game():
             }
 
             if user_input in lifelines_map:
-                lifeline_name = lifelines_map[user_input]
-                print(f"\n{C_GOLD}{C_BOLD}>>> Lifeline [{user_input}] {lifeline_name} Selected! <<<{C_RESET}")
-                input(f"{C_CYAN}Press ENTER to continue...{C_RESET}")
+                lifelines(user_input, q_data)
                 continue
 
             # Handle Answers (Input A, B, C, D)
             opt_map = {"A": 1, "B": 2, "C": 3, "D": 4}
             if user_input in opt_map:
                 chosen_opt = opt_map[user_input]
+                if q_data[chosen_opt] is None:
+                        print(
+                            f"\n{C_RED}This option has been eliminated! "
+                            f"Please choose a remaining option.{C_RESET}"
+                        )
+                        input("Press ENTER to continue...")
+                        continue
 
                 if chosen_opt == correct_opt:
                     print(f"\n{C_GREEN}{C_BOLD}CORRECT ANSWER! You won {PRIZE_TREE[current_idx]}!{C_RESET}")
