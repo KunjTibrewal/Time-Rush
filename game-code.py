@@ -5,9 +5,6 @@ import random
 import ctypes
 import time
 
-def extra_time():
-    pass
-
 #LIFELINES
 
 def fifty_fifty(q_data):
@@ -88,7 +85,7 @@ def ask_the_audience(q_data, current_idx):
 lifeline = {1: ["50-50", True, fifty_fifty],                            #[0]=LIFELINE 
             2: ["Switch the question", True, switch_question],          #[1]=AVAILABLITY
             3: ["Ask the audience", True, ask_the_audience],            #[2]=FUNCTION
-            4: ["Extra time", True, extra_time]}
+            4: ["Extra time", True, None]}
 
 def lifelines(a, q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que):
     if lifeline[int(a)][1]:
@@ -266,7 +263,7 @@ def get_input_with_timeout(timeout):
 
     def target():
         try:
-            user_ans[0] = input(f"Enter choice ({C_CYAN}A, B, C, D{C_RESET}) or Lifeline ({C_GOLD}1-4{C_RESET}): ")
+            user_ans[0] = input(f"Enter choice ({C_CYAN}A, B, C, D{C_RESET}), Lifeline ({C_GOLD}1-4{C_RESET}), or {C_RED}Q{C_RESET} (Quit): ")
         except Exception:
             pass
 
@@ -342,12 +339,17 @@ def play_game():
             render_ui(q_data, current_idx, remaining_time, total_questions)
 
             if remaining_time is None:
-                user_input = input(f"Enter choice ({C_CYAN}A, B, C, D{C_RESET}) or Lifeline ({C_GOLD}1-4{C_RESET}): ").strip().upper()
+                user_input = input(f"Enter choice ({C_CYAN}A, B, C, D{C_RESET}), Lifeline ({C_GOLD}1-4{C_RESET}), or {C_RED}Q{C_RESET} (Quit): ").strip().upper()
             else:
                 user_input = get_input_with_timeout(remaining_time)
                 if user_input == "__TIMEOUT__":
                     show_error_screen("TIME UP! You ran out of time.")
                     return  # Instantly terminates game back to main menu
+
+            # Handle Quit (Input Q)
+            if user_input == "Q":
+                show_quit_screen(current_idx)
+                return
 
             # Handle Lifelines (Input 1, 2, 3, 4)
             lifelines_map = {
@@ -358,10 +360,23 @@ def play_game():
             }
 
             if user_input in lifelines_map:
-                lifelines(user_input, q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que)
-                # If they switched the question, explicitly reset the timer for the new question!
-                if user_input == "2":
-                    start_time = time.time()
+                if lifeline[int(user_input)][1]:
+                    lifeline[int(user_input)][1] = False
+                    if user_input == "1":
+                        fifty_fifty(q_data)
+                    elif user_input == "2":
+                        switch_question(q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que)
+                        start_time = time.time()  # Reset timer exclusively for Switch Question
+                    elif user_input == "3":
+                        ask_the_audience(q_data, current_idx)
+                    elif user_input == "4":
+                        print(f"\n{C_GREEN}Extra Time lifeline activated! +60 seconds added.{C_RESET}")
+                        input("Press ENTER to continue...")
+                        if start_time is not None:
+                            start_time += 60  # Extends the remaining time by 60 seconds
+                else:
+                    print(f"\n{C_RED}You have already used the {lifeline[int(user_input)][0]}.{C_RESET}")
+                    input(f"{C_CYAN}Press ENTER to continue...{C_RESET}")
                 continue
 
             # Handle Answers (Input A, B, C, D)
@@ -386,13 +401,13 @@ def play_game():
                     show_error_screen(f"WRONG ANSWER! The correct answer was [{correct_letter}].")
                     return
             else:
-                print(f"\n{C_RED}Invalid choice! Please select A, B, C, D or Lifeline 1, 2, 3, 4.{C_RESET}")
+                print(f"\n{C_RED}Invalid choice! Please select A, B, C, D, Lifeline 1-4, or Q to quit.{C_RESET}")
                 input(f"{C_CYAN}Press ENTER to try again...{C_RESET}")
 
     show_victory_screen()
 
 # ---------------------------------------------------------
-# SCREENS (ERROR & VICTORY)
+# SCREENS (ERROR, QUIT & VICTORY)
 # ---------------------------------------------------------
 def show_error_screen(reason):
     clear_screen()
@@ -400,6 +415,15 @@ def show_error_screen(reason):
     print("    G A M E   O V E R")
     print(f"    Reason: {reason}")
     print("!" * 60 + f"{C_RESET}\n")
+    input(f"{C_CYAN}Press ENTER to return to the main menu...{C_RESET}")
+
+def show_quit_screen(current_idx):
+    clear_screen()
+    won_prize = PRIZE_TREE[current_idx - 1] if current_idx > 0 else "₹ 0"
+    print(f"\n{C_GOLD}{C_BOLD}" + "=" * 60)
+    print("    YOU CHOSE TO QUIT!")
+    print(f"    You are walking away with: {C_GREEN}{won_prize}{C_RESET}")
+    print("=" * 60 + f"{C_RESET}\n")
     input(f"{C_CYAN}Press ENTER to return to the main menu...{C_RESET}")
 
 def show_victory_screen():
