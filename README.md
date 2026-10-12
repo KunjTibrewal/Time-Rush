@@ -1,56 +1,118 @@
-# Time Rush
-TIME RUSH is a first-year B.Tech IT project developed in Python as a terminal-based interactive quiz game. It challenges players to answer questions under time pressure while testing their knowledge, accuracy, and decision-making skills. The project demonstrates fundamental Python programming concepts, including conditional statements, loops, functions, and game logic. Developed as part of our first-year coursework at VIT Vellore.
-📌 About the Project
+# ⏱️ TIME RUSH
 
-As part of our first-year coursework, we were assigned the task of developing a basic terminal-based project using Python to apply the programming concepts we had learned in class.
+### Think Fast. Answer Smart. Beat the Clock.
 
-To make the project more engaging and interactive, we decided to develop TIME RUSH, a quiz game that challenges players to answer questions while racing against time.
+**TIME RUSH** is a Python-based, terminal quiz game developed as a first-year B.Tech Information Technology project at **VIT Vellore**. Inspired by quiz-show gameplay, it challenges players to answer questions, manage limited lifelines, and climb a prize ladder while racing against time.
 
-Instead of building a conventional question-and-answer program, we wanted to create a simple game experience that combines knowledge, time pressure, scoring, and decision-making — all within a Python terminal environment.
+What started as a basic Python coursework assignment evolved into an interactive game featuring randomized questions, multiple difficulty levels, timed challenges, and strategic lifelines.
 
-🎮 What is TIME RUSH?
+---
 
-TIME RUSH is a terminal-based quiz game in which players answer a series of questions and compete against the clock. The game focuses on quick thinking, accuracy, and making decisions under time pressure.
+## 🎮 About the Game
 
-The project demonstrates how fundamental Python concepts can be used to build an interactive and engaging application without relying on a graphical user interface.
+In TIME RUSH, every question is an opportunity to climb higher on the prize ladder. Players must balance speed, accuracy, and strategy to progress through the game.
 
-Features
+With a countdown timer, increasingly difficult questions, and limited lifelines, every decision matters.
 
-Planned for v1.0
+**Answer correctly. Use your lifelines wisely. Keep climbing.**
 
- Countdown timer per question
- Randomized question bank
- Prize ladder with increasing difficulty
- Limited lifelines
- Score tracking
+## ✨ Features
 
-🎯 Project Objectives
+- **Question Bank** — A collection of questions across multiple difficulty levels.
+- **Randomized Gameplay** — Questions and answer options are randomized for a varied experience.
+- **Countdown Timer** — Answer questions before time runs out.
+- **Progressive Difficulty** — Progress through Easy, Medium, and Hard questions.
+- **Prize Ladder** — Advance through successive questions to pursue the top prize.
+- **Lifeline System** — Use limited lifelines to handle difficult questions:
+  - `50-50` — Eliminate two incorrect options.
+  - `Ask the Audience` — Get a simulated audience poll.
+  - `Switch the Question` — Replace the current question.
+  - `Extra Time` — Gain additional time when you need it.
+- **Interactive Terminal UI** — Formatted questions, answer options, and game screens.
+- **Game Progression** — Dedicated screens for winning, incorrect answers, and other game outcomes.
 
-Apply fundamental Python programming concepts in a practical project.
+## 🛠️ Built With
 
-Develop an interactive quiz game using a terminal interface.
+- **Python** — Core game logic and functionality.
+- **Standard Python Libraries** — Used for randomization, timing, terminal input handling, and text formatting.
 
-Implement question-and-answer logic, scoring, and game flow.
+## 🚀 Getting Started
 
-Explore time-based challenges and decision-making mechanics.
+### Prerequisites
 
-Strengthen problem-solving, logical thinking, and teamwork skills.
+- Python 3.x
+- A terminal or command-line interface
 
-📋 Review 1 — Project Presentation
+### Installation
 
-Date: 8 October 2026
-Faculty: Jenifa G
+1. Clone the repository:
 
-During Review 1, we presented the concept, gameplay flow, and proposed features of TIME RUSH.
+   ```bash
+   git clone https://github.com/KunjTibrewal/Time-Rush
+   ```
 
-The presentation covered:
+2. Navigate to the project directory:
 
-Core Concept: A terminal-based quiz game built around knowledge and decision-making under pressure.
+   ```bash
+   cd Time-Rush
+   ```
 
-Player Journey: Question → Answer → Lifeline → Climb → Win.
+3. Run the game:
 
-Gameplay Mechanics: Countdown timers, randomized questions, limited lifelines, and increasing difficulty.
+   ```bash
+   python game-code.py
+   ```
 
-Progression System: A prize ladder in which players aim to advance through successive levels.
+   Replace `game-code.py` with the actual Python entry-point filename if it differs.
 
-The review established the planned direction and gameplay structure for the project.
+## 🎯 Project Objectives
+
+TIME RUSH was developed to apply fundamental Python programming concepts to a practical project.
+
+- Apply conditional statements, loops, functions, and data structures.
+- Implement question handling, answer validation, and game progression.
+- Explore randomization and time-based input handling.
+- Design a terminal-based interactive user experience.
+- Develop problem-solving, logical thinking, and teamwork skills.
+
+## 🗺️ Roadmap — V1.2
+
+The next planned iteration aims to expand the game beyond its current terminal quiz experience.
+
+- [ ] **Display Rules** — Add an in-game section explaining the rules and gameplay.
+- [ ] **Display Stats** — Show player statistics and game performance.
+- [ ] **Multiple User Login** — Create a login system to support multiple players.
+- [ ] **Local Data Storage** — Save login data locally on the computer.
+- [ ] **Real-Time Timer Display** — Improve the visibility of the countdown timer during gameplay.
+
+*These features are planned for V1.2 and are not presented as completed functionality.*
+
+## 🎓 Academic Project
+
+**Course:** First-Year B.Tech Information Technology  
+**Institution:** Vellore Institute of Technology (VIT), Vellore  
+**Review 1 Date:** 8 October 2026  
+**Faculty:** Jenifa G
+
+During Review 1, we presented the core concept, gameplay flow, proposed mechanics, and progression system of TIME RUSH.
+
+The project follows the gameplay loop:
+
+**Question → Answer → Lifeline → Progress → Prize**
+
+## 👥 Team
+
+Developed collaboratively as part of our first-year coursework at VIT Vellore.
+
+## 👥 Team
+
+- **Kunj Tibrewal** — [GitHub](https://github.com/KunjTibrewal)
+- **Saurav Gupta** — [GitHub](https://github.com/sauravgupta260061)
+- **Ronit Kumar** — [GitHub](https://github.com/Ronit-Kumar2408)
+
+## 📌 Current Status
+
+TIME RUSH is an evolving project. The current version focuses on core quiz mechanics, timed questions, lifelines, and the prize ladder, with additional features planned for V1.2.
+
+
+**TIME RUSH — Every second counts.**
