@@ -3,8 +3,7 @@ import os
 import sys
 import random
 import ctypes
-
-
+import time
 
 def extra_time():
     pass
@@ -209,7 +208,7 @@ def render_ui(q_data, current_q_idx, time_limit, total_questions):
     print(f"{C_GOLD}{C_BOLD}" + "=" * 78 + f"{C_RESET}\n")
 
     # HUD Stats & Timer Info
-    timer_display = f"{time_limit}s" if time_limit else "Unlimited"
+    timer_display = f"{time_limit}s" if time_limit is not None else "Unlimited"
     print(f"  {C_CYAN}Current Prize:{C_RESET} {PRIZE_TREE[current_q_idx]}".ljust(43) + 
           f"{C_BOLD}Time Limit:{C_RESET} {C_GOLD}{timer_display}{C_RESET}".ljust(25) +
           f"{C_BOLD}Q:{C_RESET} {current_q_idx + 1} / {total_questions}")
@@ -324,14 +323,28 @@ def play_game():
         else:
             time_limit = None
 
+        # Track the exact start time for this question
+        start_time = time.time() if time_limit is not None else None
+
         while True:
             correct_opt = q_data[5]
-            render_ui(q_data, current_idx, time_limit, total_questions)
 
-            if time_limit is None:
+            # Calculate remaining time dynamically so wrong inputs don't reset it
+            if time_limit is not None:
+                elapsed = time.time() - start_time
+                remaining_time = int(time_limit - elapsed)
+                if remaining_time <= 0:
+                    show_error_screen("TIME UP! You ran out of time.")
+                    return
+            else:
+                remaining_time = None
+
+            render_ui(q_data, current_idx, remaining_time, total_questions)
+
+            if remaining_time is None:
                 user_input = input(f"Enter choice ({C_CYAN}A, B, C, D{C_RESET}) or Lifeline ({C_GOLD}1-4{C_RESET}): ").strip().upper()
             else:
-                user_input = get_input_with_timeout(time_limit)
+                user_input = get_input_with_timeout(remaining_time)
                 if user_input == "__TIMEOUT__":
                     show_error_screen("TIME UP! You ran out of time.")
                     return  # Instantly terminates game back to main menu
@@ -346,6 +359,9 @@ def play_game():
 
             if user_input in lifelines_map:
                 lifelines(user_input, q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que)
+                # If they switched the question, explicitly reset the timer for the new question!
+                if user_input == "2":
+                    start_time = time.time()
                 continue
 
             # Handle Answers (Input A, B, C, D)
