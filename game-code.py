@@ -330,7 +330,7 @@ def get_input_with_timeout(timeout):
 def play_game():
     for item in lifeline.values():
         item[1] = True
-    # Extract unique random questions using your custom selection functions[cite: 1]
+    # Extract unique random questions using your custom selection functions
     Q_No_easy = select_que_no()
     Q_No_medium = select_que_no()
     Q_No_hard = select_que_no()
@@ -378,7 +378,7 @@ def play_game():
                 elapsed = time.time() - start_time
                 remaining_time = math.ceil(time_limit - elapsed)
                 if remaining_time <= 0:
-                    show_error_screen("TIME UP! You ran out of time.")
+                    show_error_screen("TIME UP! You ran out of time.", current_idx)
                     return
             else:
                 remaining_time = None

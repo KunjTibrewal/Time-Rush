@@ -63,7 +63,6 @@ With a countdown timer, increasingly difficult questions, and limited lifelines,
    python game-code.py
    ```
 
-   Replace `game-code.py` with the actual Python entry-point filename if it differs.
 
 ## 🎯 Project Objectives
 
