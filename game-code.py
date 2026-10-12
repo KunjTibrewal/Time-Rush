@@ -201,12 +201,13 @@ def render_ui(q_data, current_q_idx, time_limit, total_questions):
           f"{C_BOLD}Q:{C_RESET} {current_q_idx + 1} / {total_questions}")
     print()
 
-    # Question Frame
+    # Question Frame (Centered text inside box)
     WIDTH = 72
     wrapped_question = textwrap.wrap(question_text, width=WIDTH - 4)
     print(f"  {C_BLUE}/" + "=" * WIDTH + f"\\{C_RESET}")
     for line in wrapped_question:
-        print(f"  {C_BLUE}|{C_RESET} {C_BOLD}{line:<{WIDTH - 2}}{C_RESET} {C_BLUE}|{C_RESET}")
+        # Changed alignment from left (<) to center (^)
+        print(f"  {C_BLUE}|{C_RESET} {C_BOLD}{line:^{WIDTH - 2}}{C_RESET} {C_BLUE}|{C_RESET}")
     print(f"  {C_BLUE}\\" + "=" * WIDTH + f"/{C_RESET}\n")
 
     # Options Grid
@@ -254,7 +255,6 @@ def render_ui(q_data, current_q_idx, time_limit, total_questions):
     print_option_row(left_c, right_d)
 
     print("\n" + f"{C_MUTED}" + "-" * 78 + f"{C_RESET}")
-
 
     # Lifelines Section Display
     print(f"  {C_GOLD}{C_BOLD}LIFELINES:{C_RESET}  " +
