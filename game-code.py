@@ -3,6 +3,7 @@ import sys
 import random
 import ctypes
 import time
+import math
 
 #LIFELINES
 
@@ -203,10 +204,11 @@ def render_ui(q_data, current_q_idx, time_limit, total_questions):
     print(f"{C_GOLD}{C_BOLD}   T I M E   R U S H  {C_RESET}".center(88))
     print(f"{C_GOLD}{C_BOLD}" + "=" * 78 + f"{C_RESET}\n")
 
-    # HUD Stats & Timer Info
+    # HUD Stats & Timer Info (Fixed spacing to prevent overlap)
     timer_display = f"{time_limit}s" if time_limit is not None else "Unlimited"
-    print(f"  {C_CYAN}Current Prize:{C_RESET} {PRIZE_TREE[current_q_idx]}".ljust(43) + 
-          f"{C_BOLD}Time Limit:{C_RESET} {C_GOLD}{timer_display}{C_RESET}".ljust(25) +
+    prize_val = PRIZE_TREE[current_q_idx]
+    print(f"  {C_CYAN}Current Prize:{C_RESET} {prize_val:<12}   "
+          f"{C_BOLD}Time Limit:{C_RESET} {C_GOLD}{timer_display:<10}{C_RESET}   "
           f"{C_BOLD}Q:{C_RESET} {current_q_idx + 1} / {total_questions}")
     print()
 
@@ -349,10 +351,10 @@ def play_game():
         while True:
             correct_opt = q_data[5]
 
-            # Calculate remaining time dynamically so wrong inputs don't reset it
+            # Calculate remaining time dynamically using math.ceil so it starts at exact 45/60s
             if time_limit is not None:
                 elapsed = time.time() - start_time
-                remaining_time = int(time_limit - elapsed)
+                remaining_time = math.ceil(time_limit - elapsed)
                 if remaining_time <= 0:
                     show_error_screen("TIME UP! You ran out of time.")
                     return
