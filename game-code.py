@@ -1,4 +1,3 @@
-import threading
 import os
 import sys
 import random
@@ -256,26 +255,50 @@ def render_ui(q_data, current_q_idx, time_limit, total_questions):
     print(f"{C_MUTED}" + "-" * 78 + f"{C_RESET}\n")
 
 # ---------------------------------------------------------
-# TIMED INPUT HELPER
+# TIMED INPUT HELPER (Non-blocking native I/O)
 # ---------------------------------------------------------
+if sys.platform == "win32":
+    import msvcrt
+else:
+    import select
+
 def get_input_with_timeout(timeout):
-    user_ans = [None]
-
-    def target():
-        try:
-            user_ans[0] = input(f"Enter choice ({C_CYAN}A, B, C, D{C_RESET}), Lifeline ({C_GOLD}1-4{C_RESET}), or {C_RED}Q{C_RESET} (Quit): ")
-        except Exception:
-            pass
-
-    thread = threading.Thread(target=target)
-    thread.daemon = True
-    thread.start()
-    thread.join(timeout)
-
-    if thread.is_alive():
-        return "__TIMEOUT__"
+    prompt_msg = f"Enter choice ({C_CYAN}A, B, C, D{C_RESET}), Lifeline ({C_GOLD}1-4{C_RESET}), or {C_RED}Q{C_RESET} (Quit): "
+    print(prompt_msg, end="", flush=True)
     
-    return user_ans[0].strip().upper() if user_ans[0] is not None else ""
+    start_time = time.time()
+    input_chars = []
+
+    while True:
+        if time.time() - start_time >= timeout:
+            print()
+            return "__TIMEOUT__"
+
+        if sys.platform == "win32":
+            if msvcrt.kbhit():
+                char = msvcrt.getch()
+                if char in b'\r\n':
+                    print()
+                    line = b"".join(input_chars).decode('utf-8', errors='ignore').strip().upper()
+                    return line
+                elif char == b'\x08':  # Backspace
+                    if input_chars:
+                        input_chars.pop()
+                        print('\b \b', end='', flush=True)
+                else:
+                    try:
+                        decoded = char.decode('utf-8')
+                        input_chars.append(char)
+                        print(decoded, end='', flush=True)
+                    except:
+                        pass
+        else:
+            rlist, _, _ = select.select([sys.stdin], [], [], 0.05)
+            if rlist:
+                line = sys.stdin.readline()
+                return line.strip().upper()
+
+        time.sleep(0.02)
 
 # ---------------------------------------------------------
 # GAME FLOW
@@ -361,12 +384,25 @@ def play_game():
 
             if user_input in lifelines_map:
                 if lifeline[int(user_input)][1]:
+                    # Prevent Extra Time lifeline on Hard questions (Questions 11-15)
+                    if user_input == "4" and current_idx >= 10:
+                        print(f"\n{C_RED}Extra Time lifeline cannot be used on Hard questions (Unlimited time)!{C_RESET}")
+                        input(f"{C_CYAN}Press ENTER to continue...{C_RESET}")
+                        continue
+
                     lifeline[int(user_input)][1] = False
                     if user_input == "1":
                         fifty_fifty(q_data)
                     elif user_input == "2":
                         switch_question(q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que)
-                        start_time = time.time()  # Reset timer exclusively for Switch Question
+                        # Re-evaluate the time limit based on the switched question index tier
+                        if current_idx < 5:
+                            time_limit = 45
+                        elif current_idx < 10:
+                            time_limit = 60
+                        else:
+                            time_limit = None
+                        start_time = time.time() if time_limit is not None else None
                     elif user_input == "3":
                         ask_the_audience(q_data, current_idx)
                     elif user_input == "4":
