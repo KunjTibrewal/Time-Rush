@@ -1,12 +1,11 @@
-import threading
 import os
 import sys
 import random
 import ctypes
 import time
-
-def extra_time():
-    pass
+import math
+import textwrap
+import re
 
 #LIFELINES
 
@@ -88,20 +87,7 @@ def ask_the_audience(q_data, current_idx):
 lifeline = {1: ["50-50", True, fifty_fifty],                            #[0]=LIFELINE 
             2: ["Switch the question", True, switch_question],          #[1]=AVAILABLITY
             3: ["Ask the audience", True, ask_the_audience],            #[2]=FUNCTION
-            4: ["Extra time", True, extra_time]}
-
-def lifelines(a, q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que):
-    if lifeline[int(a)][1]:
-        lifeline[int(a)][1] = False
-        if int(a) == 2:
-            switch_question(q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que)
-        elif int(a) == 3:
-            ask_the_audience(q_data, current_idx)
-        else:
-            lifeline[int(a)][2](q_data)
-    else:
-        print(f"\n{C_RED}You have already used the {lifeline[int(a)][0]}.{C_RESET}")
-        input(f"{C_CYAN}Press ENTER to continue...{C_RESET}")
+            4: ["Extra time", True, None]}
 
 
 # Safe initialization for ANSI colors on Windows CMD
@@ -207,43 +193,77 @@ def render_ui(q_data, current_q_idx, time_limit, total_questions):
     print(f"{C_GOLD}{C_BOLD}   T I M E   R U S H  {C_RESET}".center(88))
     print(f"{C_GOLD}{C_BOLD}" + "=" * 78 + f"{C_RESET}\n")
 
-    # HUD Stats & Timer Info
+    # HUD Stats & Timer Info (Fixed spacing to prevent overlap)
     timer_display = f"{time_limit}s" if time_limit is not None else "Unlimited"
-    print(f"  {C_CYAN}Current Prize:{C_RESET} {PRIZE_TREE[current_q_idx]}".ljust(43) + 
-          f"{C_BOLD}Time Limit:{C_RESET} {C_GOLD}{timer_display}{C_RESET}".ljust(25) +
+    prize_val = PRIZE_TREE[current_q_idx]
+    print(f"  {C_CYAN}Current Prize:{C_RESET} {prize_val:<12}   "
+          f"{C_BOLD}Time Limit:{C_RESET} {C_GOLD}{timer_display:<10}{C_RESET}   "
           f"{C_BOLD}Q:{C_RESET} {current_q_idx + 1} / {total_questions}")
     print()
 
-    # Question Frame
-    print(f"  {C_BLUE}/" + "=" * 72 + f"\\{C_RESET}")
-    print(f" {C_BLUE}/" + f"  {C_BOLD}{question_text}{C_RESET}".center(80) + f"{C_BLUE}\\{C_RESET}")
-    print(f"  {C_BLUE}\\" + "=" * 72 + f"/{C_RESET}\n")
+    # Question Frame (Centered text inside box)
+    WIDTH = 72
+    wrapped_question = textwrap.wrap(question_text, width=WIDTH - 4)
+    print(f"  {C_BLUE}/" + "=" * WIDTH + f"\\{C_RESET}")
+    for line in wrapped_question:
+        # Changed alignment from left (<) to center (^)
+        print(f"  {C_BLUE}|{C_RESET} {C_BOLD}{line:^{WIDTH - 2}}{C_RESET} {C_BLUE}|{C_RESET}")
+    print(f"  {C_BLUE}\\" + "=" * WIDTH + f"/{C_RESET}\n")
 
     # Options Grid
     opt_labels = ["A", "B", "C", "D"]
-    formatted_opts = []
+    OPTION_WIDTH = 34
+    COLUMN_GAP = "    "
+    def format_option(i):
+        option = options[i]
+        if option is None:
+            return [""]
+    
+        prefix = f"{C_CYAN}[{opt_labels[i]}]:{C_RESET} "
+        text_width = OPTION_WIDTH - 5
+        wrapped = textwrap.wrap(str(option), width=text_width) or [""]
+    
+        return [
+            prefix + f"{C_BOLD}{wrapped[0]}{C_RESET}"
+        ] + [
+            " " * 5 + f"{C_BOLD}{line}{C_RESET}"
+            for line in wrapped[1:]
+        ]
 
-    for i in range(4):
-        text = options[i]
-        if text is None:
-            formatted_opts.append(" " * 30)
-        else:
-            formatted_opts.append(
-                f"{C_CYAN}[{opt_labels[i]}]:{C_RESET} "
-                f"{C_BOLD}{text:<22}{C_RESET}"
-            )
+    left_a = format_option(0)
+    right_b = format_option(1)
+    left_c = format_option(2)
+    right_d = format_option(3)
 
-    print(f"    {formatted_opts[0].ljust(48)} {formatted_opts[1]}")
+    
+    def print_option_row(left, right):
+        rows = max(len(left), len(right))
+
+        def visible_len(text):
+            return len(re.sub(r'\033\[[0-9;]*m', '', text))
+
+        for i in range(rows):
+            l_text = left[i] if i < len(left) else ""
+            r_text = right[i] if i < len(right) else ""
+
+            padding = max(4, 43 - visible_len(l_text))
+            print(f"    {l_text}{' ' * padding}{r_text}")
+
+
+    print_option_row(left_a, right_b)
     print()
-    print(f"    {formatted_opts[2].ljust(48)} {formatted_opts[3]}")
+    print_option_row(left_c, right_d)
+
     print("\n" + f"{C_MUTED}" + "-" * 78 + f"{C_RESET}")
 
     # Lifelines Section Display
-    print(f"  {C_GOLD}{C_BOLD}LIFELINES:{C_RESET}  "
-          f"{C_GOLD}[1]{C_RESET} 50-50   |   "
-          f"{C_GOLD}[2]{C_RESET} Switch Question   |   "
-          f"{C_GOLD}[3]{C_RESET} Audience Poll   |   "
-          f"{C_GOLD}[4]{C_RESET} Extra Time")
+    print(f"  {C_GOLD}{C_BOLD}LIFELINES:{C_RESET}  " +
+          " | ".join(
+              f"{C_GOLD}[{idx}]{C_RESET} "
+              f"{C_BOLD if lifeline[idx][1] else ''}"
+              f"{lifeline[idx][0]}"
+              f"{C_RESET}"
+              for idx in lifeline.keys()))
     print(f"{C_MUTED}" + "-" * 78 + f"{C_RESET}")
 
     # Money Ladder (Showing current active prize window)
@@ -259,26 +279,50 @@ def render_ui(q_data, current_q_idx, time_limit, total_questions):
     print(f"{C_MUTED}" + "-" * 78 + f"{C_RESET}\n")
 
 # ---------------------------------------------------------
-# TIMED INPUT HELPER
+# TIMED INPUT HELPER (Non-blocking native I/O)
 # ---------------------------------------------------------
+if sys.platform == "win32":
+    import msvcrt
+else:
+    import select
+
 def get_input_with_timeout(timeout):
-    user_ans = [None]
-
-    def target():
-        try:
-            user_ans[0] = input(f"Enter choice ({C_CYAN}A, B, C, D{C_RESET}) or Lifeline ({C_GOLD}1-4{C_RESET}): ")
-        except Exception:
-            pass
-
-    thread = threading.Thread(target=target)
-    thread.daemon = True
-    thread.start()
-    thread.join(timeout)
-
-    if thread.is_alive():
-        return "__TIMEOUT__"
+    prompt_msg = f"Enter choice ({C_CYAN}A, B, C, D{C_RESET}), Lifeline ({C_GOLD}1-4{C_RESET}), or {C_RED}Q{C_RESET} (Quit): "
+    print(prompt_msg, end="", flush=True)
     
-    return user_ans[0].strip().upper() if user_ans[0] is not None else ""
+    start_time = time.time()
+    input_chars = []
+
+    while True:
+        if time.time() - start_time >= timeout:
+            print()
+            return "__TIMEOUT__"
+
+        if sys.platform == "win32":
+            if msvcrt.kbhit():
+                char = msvcrt.getch()
+                if char in b'\r\n':
+                    print()
+                    line = b"".join(input_chars).decode('utf-8', errors='ignore').strip().upper()
+                    return line
+                elif char == b'\x08':  # Backspace
+                    if input_chars:
+                        input_chars.pop()
+                        print('\b \b', end='', flush=True)
+                else:
+                    try:
+                        decoded = char.decode('utf-8')
+                        input_chars.append(char)
+                        print(decoded, end='', flush=True)
+                    except:
+                        pass
+        else:
+            rlist, _, _ = select.select([sys.stdin], [], [], 0.05)
+            if rlist:
+                line = sys.stdin.readline()
+                return line.strip().upper()
+
+        time.sleep(0.02)
 
 # ---------------------------------------------------------
 # GAME FLOW
@@ -286,7 +330,7 @@ def get_input_with_timeout(timeout):
 def play_game():
     for item in lifeline.values():
         item[1] = True
-    # Extract unique random questions using your custom selection functions[cite: 1]
+    # Extract unique random questions using your custom selection functions
     Q_No_easy = select_que_no()
     Q_No_medium = select_que_no()
     Q_No_hard = select_que_no()
@@ -329,12 +373,12 @@ def play_game():
         while True:
             correct_opt = q_data[5]
 
-            # Calculate remaining time dynamically so wrong inputs don't reset it
+            # Calculate remaining time dynamically using math.ceil so it starts at exact 45/60s
             if time_limit is not None:
                 elapsed = time.time() - start_time
-                remaining_time = int(time_limit - elapsed)
+                remaining_time = math.ceil(time_limit - elapsed)
                 if remaining_time <= 0:
-                    show_error_screen("TIME UP! You ran out of time.")
+                    show_error_screen("TIME UP! You ran out of time.", current_idx)
                     return
             else:
                 remaining_time = None
@@ -342,12 +386,17 @@ def play_game():
             render_ui(q_data, current_idx, remaining_time, total_questions)
 
             if remaining_time is None:
-                user_input = input(f"Enter choice ({C_CYAN}A, B, C, D{C_RESET}) or Lifeline ({C_GOLD}1-4{C_RESET}): ").strip().upper()
+                user_input = input(f"Enter choice ({C_CYAN}A, B, C, D{C_RESET}), Lifeline ({C_GOLD}1-4{C_RESET}), or {C_RED}Q{C_RESET} (Quit): ").strip().upper()
             else:
                 user_input = get_input_with_timeout(remaining_time)
                 if user_input == "__TIMEOUT__":
-                    show_error_screen("TIME UP! You ran out of time.")
+                    show_error_screen("TIME UP! You ran out of time.", current_idx)
                     return  # Instantly terminates game back to main menu
+
+            # Handle Quit (Input Q)
+            if user_input == "Q":
+                show_quit_screen(current_idx)
+                return
 
             # Handle Lifelines (Input 1, 2, 3, 4)
             lifelines_map = {
@@ -358,10 +407,30 @@ def play_game():
             }
 
             if user_input in lifelines_map:
-                lifelines(user_input, q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que)
-                # If they switched the question, explicitly reset the timer for the new question!
-                if user_input == "2":
-                    start_time = time.time()
+                if lifeline[int(user_input)][1]:
+                    lifeline[int(user_input)][1] = False
+                    if user_input == "1":
+                        fifty_fifty(q_data)
+                    elif user_input == "2":
+                        switch_question(q_data, current_idx, used_questions, Easy_que, Medium_que, Hard_que)
+                        # Re-evaluate the time limit based on the switched question index tier
+                        if current_idx < 5:
+                            time_limit = 45
+                        elif current_idx < 10:
+                            time_limit = 60
+                        else:
+                            time_limit = None
+                        start_time = time.time() if time_limit is not None else None
+                    elif user_input == "3":
+                        ask_the_audience(q_data, current_idx)
+                    elif user_input == "4":
+                        print(f"\n{C_GREEN}Extra Time lifeline activated! +60 seconds added.{C_RESET}")
+                        input("Press ENTER to continue...")
+                        if start_time is not None:
+                            start_time += 60  # Extends the remaining time by 60 seconds
+                else:
+                    print(f"\n{C_RED}You have already used the {lifeline[int(user_input)][0]} or it is not available for this question.{C_RESET}.")
+                    input(f"{C_CYAN}Press ENTER to continue...{C_RESET}")
                 continue
 
             # Handle Answers (Input A, B, C, D)
@@ -378,36 +447,70 @@ def play_game():
 
                 if chosen_opt == correct_opt:
                     print(f"\n{C_GREEN}{C_BOLD}CORRECT ANSWER! You won {PRIZE_TREE[current_idx]}!{C_RESET}")
-                    input(f"{C_CYAN}Press ENTER for the next question...{C_RESET}")
+                    if current_idx == 14:
+                        input(f"{C_CYAN}Press ENTER to view your winnings...{C_RESET}")
+                    else:
+                        input(f"{C_CYAN}Press ENTER for the next question...{C_RESET}")
                     current_idx += 1
+                    if current_idx == 10:
+                        lifeline[4][1] = False  # Disable Extra Time lifeline for Hard questions
                     break
                 else:
                     correct_letter = [k for k, v in opt_map.items() if v == correct_opt][0]
-                    show_error_screen(f"WRONG ANSWER! The correct answer was [{correct_letter}].")
+                    show_error_screen(f"WRONG ANSWER! The correct answer was [{correct_letter}].", current_idx)
                     return
             else:
-                print(f"\n{C_RED}Invalid choice! Please select A, B, C, D or Lifeline 1, 2, 3, 4.{C_RESET}")
+                print(f"\n{C_RED}Invalid choice! Please select A, B, C, D, Lifeline 1-4, or Q to quit.{C_RESET}")
                 input(f"{C_CYAN}Press ENTER to try again...{C_RESET}")
 
-    show_victory_screen()
+    show_victory_screen(current_idx)
 
 # ---------------------------------------------------------
-# SCREENS (ERROR & VICTORY)
+# SCREENS (ERROR, QUIT & VICTORY)
 # ---------------------------------------------------------
-def show_error_screen(reason):
-    clear_screen()
+def show_error_screen(reason, current_idx):
     print(f"\n{C_RED}{C_BOLD}" + "!" * 60)
     print("    G A M E   O V E R")
     print(f"    Reason: {reason}")
     print("!" * 60 + f"{C_RESET}\n")
+    input(f"{C_CYAN}Press ENTER to view your winnings...{C_RESET}")
+    show_victory_screen(current_idx)
+
+def show_quit_screen(current_idx):
+    clear_screen()
+    won_prize = PRIZE_TREE[current_idx - 1] if current_idx > 0 else "₹ 0"
+    print(f"\n{C_GOLD}{C_BOLD}" + "=" * 60)
+    print("    YOU CHOSE TO QUIT!")
+    print(f"    You are walking away with: {C_GREEN}{won_prize}{C_RESET}")
+    print("=" * 60 + f"{C_RESET}\n")
     input(f"{C_CYAN}Press ENTER to return to the main menu...{C_RESET}")
 
-def show_victory_screen():
+def show_victory_screen(current_idx):
     clear_screen()
-    print(f"\n{C_GOLD}{C_BOLD}" + "★" * 65)
-    print("    C O N G R A T U L A T I O N S ! ! !")
-    print("    YOU HAVE CONQUERED TIME RUSH AND WON 7 CRORE!")
-    print("★" * 65 + f"{C_RESET}\n")
+    if current_idx == 15:
+        print(f"\n{C_GOLD}{C_BOLD}" + "★" * 65)
+        print("             C O N G R A T U L A T I O N S ! ! !")
+        print()
+        print("    YOU HAVE CONQUERED TIME RUSH AND WON 1 CRORE!")
+        print("★" * 65 + f"{C_RESET}\n")
+    else:
+        if current_idx < 5:
+            won_prize = "₹ 0"
+        elif current_idx < 10:
+            won_prize = PRIZE_TREE[4]  # ₹ 10,000
+        else:
+            won_prize = PRIZE_TREE[9]  # ₹ 3,20,000
+        if won_prize == "₹ 0":
+            print(f"\n{C_RED}{C_BOLD}" + "!" * 60)
+            print("    G A M E   O V E R")
+            print("    You did not win any prize money.")
+            print("!" * 60 + f"{C_RESET}\n")
+        else: 
+            print(f"\n{C_GOLD}{C_BOLD}" + "=" * 60)
+            print("              C O N G R A T U L A T I O N S !")
+            print()
+            print(f"    You are walking away with: {C_GREEN}{won_prize}{C_RESET}")
+            print(f"\n{C_GOLD}{C_BOLD}" + "=" * 60)
     input(f"{C_CYAN}Press ENTER to return to the main menu...{C_RESET}")
 
 def main():
