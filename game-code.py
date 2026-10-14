@@ -50,12 +50,12 @@ def switch_question(q_data, current_idx, used_questions, Easy_que, Medium_que, H
 
 def ask_the_audience(q_data, current_idx):
     if current_idx < 5:
-        accuracy = 0.95                                                                      #EASY QUESTION AUDIENCE ACCURACY 0.95
+        accuracy = 0.95                                                             #EASY QUESTION AUDIENCE ACCURACY 0.95
     elif current_idx < 10:
-        accuracy = 0.85                                                                      #MEDIUM QUESTION AUDIENCE ACCURACY 0.85
+        accuracy = 0.85                                                             #MEDIUM QUESTION AUDIENCE ACCURACY 0.85
     else:
-        accuracy = 0.65                                                                      #HARD QUESTION AUDIENCE ACCURACY 0.65
-    active_options = [i for i in range(1, 5) if q_data[i] is not None]                       #FOR 50-50 LIFELINE, ELIMINATE OPTIONS
+        accuracy = 0.65                                                             #HARD QUESTION AUDIENCE ACCURACY 0.65
+    active_options = [i for i in range(1, 5) if q_data[i] is not None]                      #FOR 50-50 LIFELINE, ELIMINATE OPTIONS
     correct_opt = q_data[5]
     if random.random() < accuracy:
         winner = correct_opt
@@ -71,7 +71,7 @@ def ask_the_audience(q_data, current_idx):
         if votes[winner] > max(votes[i] for i in active_options if i != winner):
             break
 
-    print(f"\n{C_GOLD}{C_BOLD}       AUDIENCE POLL{C_RESET}")
+    print(f"\n{C_GOLD}{C_BOLD}      AUDIENCE POLL{C_RESET}")
     print("-" * 40)
     for option in active_options:
         label = "ABCD"[option - 1]
@@ -190,7 +190,7 @@ def render_ui(q_data, current_q_idx, time_limit, total_questions):
 
     # Header
     print(f"{C_GOLD}{C_BOLD}" + "=" * 78 + f"{C_RESET}")
-    print(f"{C_GOLD}{C_BOLD}   T I M E   R U S H  {C_RESET}".center(88))
+    print(f"{C_GOLD}{C_BOLD}   T I M E   R U S H   {C_RESET}".center(88))
     print(f"{C_GOLD}{C_BOLD}" + "=" * 78 + f"{C_RESET}\n")
 
     # HUD Stats & Timer Info (Fixed spacing to prevent overlap)
@@ -466,7 +466,7 @@ def play_game():
     show_victory_screen(current_idx)
 
 # ---------------------------------------------------------
-# SCREENS (ERROR, QUIT & VICTORY)
+# SCREENS (ERROR, QUIT, VICTORY & RULES)
 # ---------------------------------------------------------
 def show_error_screen(reason, current_idx):
     print(f"\n{C_RED}{C_BOLD}" + "!" * 60)
@@ -489,7 +489,7 @@ def show_victory_screen(current_idx):
     clear_screen()
     if current_idx == 15:
         print(f"\n{C_GOLD}{C_BOLD}" + "★" * 65)
-        print("             C O N G R A T U L A T I O N S ! ! !")
+        print("            C O N G R A T U L A T I O N S ! ! !")
         print()
         print("    YOU HAVE CONQUERED TIME RUSH AND WON 1 CRORE!")
         print("★" * 65 + f"{C_RESET}\n")
@@ -507,10 +507,46 @@ def show_victory_screen(current_idx):
             print("!" * 60 + f"{C_RESET}\n")
         else: 
             print(f"\n{C_GOLD}{C_BOLD}" + "=" * 60)
-            print("              C O N G R A T U L A T I O N S !")
+            print("             C O N G R A T U L A T I O N S !")
             print()
             print(f"    You are walking away with: {C_GREEN}{won_prize}{C_RESET}")
             print(f"\n{C_GOLD}{C_BOLD}" + "=" * 60)
+    input(f"{C_CYAN}Press ENTER to return to the main menu...{C_RESET}")
+
+def show_rules_screen():
+    clear_screen()
+    print(f"{C_GOLD}{C_BOLD}" + "=" * 78 + f"{C_RESET}")
+    print(f"{C_GOLD}{C_BOLD}   WELCOME TO TIME RUSH: GAME RULES   {C_RESET}".center(88))
+    print(f"{C_GOLD}{C_BOLD}" + "=" * 78 + f"{C_RESET}\n")
+    print(f"{C_CYAN}Please read the rules carefully before starting the clock. Every second counts!{C_RESET}\n")
+
+    print(f"{C_GOLD}{C_BOLD}THE PRIZE LADDER & MILESTONES{C_RESET}")
+    print("-" * 40)
+    print("You will face 15 questions of increasing difficulty to reach the ultimate prize.\n")
+    print(f"• {C_BOLD}The Prize Levels:{C_RESET} 1K | 2K | 3K | 5K | 10K → 20K | 40K | 80K | 160K | 320K → 640K | 12.5L | 25L | 50L | 1 Crore")
+    print(f"• {C_BOLD}Milestone 1 (Q5):{C_RESET} Once you pass Question 5, you lock in a guaranteed {C_GREEN}₹10,000{C_RESET}. If you answer incorrectly between Questions 6–10, you walk away with this amount.")
+    print(f"• {C_BOLD}Milestone 2 (Q10):{C_RESET} Once you pass Question 10, you lock in a guaranteed {C_GREEN}₹3,20,000{C_RESET}. If you answer incorrectly between Questions 11–15, you walk away with this amount.")
+    print(f"• {C_BOLD}Quitting:{C_RESET} If a question is too risky, you can choose to Quit before locked-in submission. You will take home the full amount won on the last correctly answered question.")
+    print(f"• {C_BOLD}Wrong Answers:{C_RESET} Answering incorrectly before Question 5 means you leave with {C_RED}₹0{C_RESET}.\n")
+
+    print(f"{C_GOLD}{C_BOLD}THE CLOCK (TIERED TIME LIMITS){C_RESET}")
+    print("-" * 40)
+    print("Time varies based on the difficulty of the questions:\n")
+    print(f"• {C_BOLD}Questions 1 – 5 (Easy):{C_RESET} {C_CYAN}45 seconds{C_RESET} per question.")
+    print(f"• {C_BOLD}Questions 6 – 10 (Medium):{C_RESET} {C_CYAN}60 seconds{C_RESET} per question.")
+    print(f"• {C_BOLD}Questions 11 – 15 (Hard):{C_RESET} {C_CYAN}Infinite time{C_RESET} (No clock countdown).")
+    print(f"• {C_BOLD}Note:{C_RESET} Running out of time counts as a wrong answer and triggers your current milestone payout.\n")
+
+    print(f"{C_GOLD}{C_BOLD}STRATEGIC LIFELINES{C_RESET}")
+    print("-" * 40)
+    print("You have 4 lifelines available. Each lifeline can only be used ONCE per game:\n")
+    print(f"• {C_GOLD}50-50:{C_RESET} The system randomly eliminates two incorrect options, leaving you with the correct answer and one wrong choice.")
+    print(f"• {C_GOLD}Audience Poll:{C_RESET} Simulates a live audience response graph. Warning: The majority opinion is not guaranteed to be correct!")
+    print(f"• {C_GOLD}Switch the Question:{C_RESET} Discards the current question and replaces it with a brand-new one of the same difficulty level.")
+    print(f"• {C_GOLD}Extra Time (+60s):{C_RESET} Adds 60 seconds to your active countdown timer.")
+    print(f"  - {C_MUTED}Restriction: This lifeline can only be used during the first 10 questions (while the timer is active). It cannot be used in the infinite-time zone.{C_RESET}\n")
+
+    print(f"{C_MUTED}" + "-" * 78 + f"{C_RESET}")
     input(f"{C_CYAN}Press ENTER to return to the main menu...{C_RESET}")
 
 def main():
@@ -520,13 +556,16 @@ def main():
         print(f"{C_GOLD}{C_BOLD}      WELCOME TO TIME RUSH - KBC TERMINAL GAME{C_RESET}")
         print(f"{C_GOLD}{C_BOLD}" + "=" * 60 + f"{C_RESET}\n")
         print(f"  {C_CYAN}[1]{C_RESET} Start Game")
-        print(f"  {C_CYAN}[2]{C_RESET} Exit\n")
+        print(f"  {C_CYAN}[2]{C_RESET} Rules")
+        print(f"  {C_CYAN}[3]{C_RESET} Exit\n")
 
-        choice = input("Select an option (1-2): ").strip()
+        choice = input("Select an option (1-3): ").strip()
 
         if choice == "1":
             play_game()
         elif choice == "2":
+            show_rules_screen()
+        elif choice == "3":
             clear_screen()
             print(f"{C_GOLD}Thanks for playing Time Rush! Goodbye!{C_RESET}")
             break
