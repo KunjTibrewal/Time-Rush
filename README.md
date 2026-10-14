@@ -78,7 +78,6 @@ TIME RUSH was developed to apply fundamental Python programming concepts to a pr
 
 The next planned iteration aims to expand the game beyond its current terminal quiz experience.
 
-- [ ] **Display Rules** — Add an in-game section explaining the rules and gameplay.
 - [ ] **Display Stats** — Show player statistics and game performance.
 - [ ] **Multiple User Login** — Create a login system to support multiple players.
 - [ ] **Local Data Storage** — Save login data locally on the computer.
