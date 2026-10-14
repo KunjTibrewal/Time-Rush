@@ -553,7 +553,7 @@ def main():
     while True:
         clear_screen()
         print(f"{C_GOLD}{C_BOLD}" + "=" * 60 + f"{C_RESET}")
-        print(f"{C_GOLD}{C_BOLD}      WELCOME TO TIME RUSH - KBC TERMINAL GAME{C_RESET}")
+        print(f"{C_GOLD}{C_BOLD}      WELCOME TO TIME RUSH - A GAME OF INTELLECT AND SPEED{C_RESET}")
         print(f"{C_GOLD}{C_BOLD}" + "=" * 60 + f"{C_RESET}\n")
         print(f"  {C_CYAN}[1]{C_RESET} Start Game")
         print(f"  {C_CYAN}[2]{C_RESET} Rules")
