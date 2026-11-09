@@ -124,7 +124,7 @@ def select_que_no():
 def Shuffle_Optins(_List_, Correct_Ans):
     question = []
     for Numbers in range(10):
-        Suffled_Options = list(set(_List_[Numbers][1:]))
+        Suffled_Options = _List_[Numbers][1:]
         random.shuffle(Suffled_Options) # Shuffles option order as well
         question.append([_List_[Numbers][0]] + Suffled_Options + [Suffled_Options.index(Correct_Ans[Numbers]) + 1])
     return question
